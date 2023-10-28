@@ -4,6 +4,7 @@ Setup
 ```
 export WORK_DIR=$(readlink -f $PWD)
 singularity shell -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64
+cd $WORK_DIR
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 scram p CMSSW CMSSW_10_6_26
