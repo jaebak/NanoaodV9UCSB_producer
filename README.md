@@ -2,6 +2,8 @@ Makes nanoaodv9 from miniaod
 
 Setup
 ```
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+pip install ask --user
 export WORK_DIR=$(readlink -f $PWD)
 singularity shell -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64
 cd $WORK_DIR
@@ -25,3 +27,7 @@ make_cl_files.py
 ```
 
 Running cl file
+```
+convert_cl_to_jobs_info.py cl_ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1__NANOAODSIM jsons/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1__NANOAODSIM.json
+auto_submit_jobs.py jsons/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1__NANOAODSIM.json
+```

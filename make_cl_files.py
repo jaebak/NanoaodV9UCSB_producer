@@ -123,4 +123,5 @@ singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -
   command_lines_filename = f'cl_{"__".join(dataset_name.split("/")[1:])}'
   with open(command_lines_filename, 'w') as command_lines_file:
     for command_path in command_paths:
-      command_lines_file.write(f'{command_path}\n')
+      command_lines_file.write(f'echo {command_path}\n')
+  os.chmod(command_lines_filename, os.stat(command_lines_filename).st_mode | stat.S_IEXEC)

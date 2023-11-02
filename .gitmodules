@@ -1,3 +1,6 @@
 [submodule "modules/queue_system"]
 	path = modules/queue_system
 	url = git@github.com:richstu/queue_system.git
+[submodule "modules/jb_utils"]
+	path = modules/jb_utils
+	url = git@github.com:richstu/jb_utils.git
