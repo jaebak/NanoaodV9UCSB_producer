@@ -133,8 +133,8 @@ if __name__ == "__main__":
   run_script_folder = 'run_scripts'
   output_folder = 'nanoaod'
   number_of_events = '-1'
-  #number_of_events = '100'
   do_query = True
+  #number_of_events = '100'
   #do_query = False
 
   if do_query:
@@ -268,7 +268,7 @@ cd ../../
 {cmsCfg_command}
 {cmsRun_command}
 EndOfTestFile
-singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /data/localsite/SITECONF/local -B /net/cms11/cms11r0/pico -B /net/cms18/cms18r0/store /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64 bash {tmp_folder}/{run_script_name}.cmd_in_env
+singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /data/localsite/SITECONF/local -B /net/cms18/cms18r0/pico -B /net/cms11/cms11r0/pico -B /net/cms18/cms18r0/store /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64 bash {tmp_folder}/{run_script_name}.cmd_in_env
 ''')
       os.chmod(run_script_path, os.stat(run_script_path).st_mode | stat.S_IEXEC)
       command_paths.append([run_script_path, nevents])

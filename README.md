@@ -45,14 +45,15 @@ export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 mkdir run_scripts
 mkdir jsons
 mkdir tmp_scripts
+ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
 ./make_cl_files.py
 ```
 
 4. Running cl file
 ```
-ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
 screen
 source set_env.sh
-convert_cl_to_jobs_info.py cl_nanoaodv9UCSB2 nanoaodv9UCSB2.json
-auto_submit_jobs.py nanoaodv9UCSB2.json -n cms18 -c scripts/check_nanoaod_entries.py;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
+convert_cl_to_jobs_info.py cl_nanoaodv9UCSB2 cl_nanoaodv9UCSB2.json
+mkdir logs
+auto_submit_jobs.py cl_nanoaodv9UCSB2.json -n cms18 -r 128 -c scripts/check_nanoaod_entries.py;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
 ```
