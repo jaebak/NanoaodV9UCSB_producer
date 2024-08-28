@@ -23,7 +23,9 @@ scram p CMSSW CMSSW_10_6_26
 cd CMSSW_10_6_26/src
 cmsenv
 git cms-addpkg PhysicsTools/NanoAOD
-# git remote add nanoaodv9UCSB git@github.com:jaebak/cmssw_nanoaodv9UCSB.git
+# To update cmsssw code
+# git remote add nanoaodv9UCSBgit git@github.com:jaebak/cmssw_nanoaodv9UCSB.git
+# git push --set-upstream nanoaodv9UCSBgit from-CMSSW_10_6_26
 git remote add nanoaodv9UCSB https://github.com/jaebak/cmssw_nanoaodv9UCSB.git
 git pull nanoaodv9UCSB from-CMSSW_10_6_26
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaUL2016To2018#Scale_and_smearing_corrections_f
