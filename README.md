@@ -50,11 +50,9 @@ mkdir tmp_scripts
 
 4. Running cl file
 ```
-ln -s /net/cms11/cms11r0/pico/NanoAODv9UCSB nanoaod
+ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
 screen
 source set_env.sh
-convert_cl_to_jobs_info.py cl_nanoaodv9UCSB_v1 nanoaodv9UCSB_v1.json
-auto_submit_jobs.py nanoaodv9UCSB_v1.json -c scripts/check_nanoaod_entries.py
-auto_submit_jobs.py nanoaodv9UCSB_v1.json -c scripts/check_nanoaod_entries.py;sendTelegramMessage.py "Finished nanoaodv9UCSB_v1 for ZG"
-auto_submit_jobs.py nanoaodv9UCSB_v1.json -n cms11 -c scripts/check_nanoaod_entries.py;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB_v1 for ZG"
+convert_cl_to_jobs_info.py cl_nanoaodv9UCSB2 nanoaodv9UCSB2.json
+auto_submit_jobs.py nanoaodv9UCSB2.json -n cms18 -c scripts/check_nanoaod_entries.py;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
 ```

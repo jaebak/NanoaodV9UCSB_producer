@@ -100,13 +100,22 @@ def get_miniaod_files(argument):
 if __name__ == "__main__":
   # Make cl file and json file for checking
 
-  datasets_name = ["/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
-                   "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM",
-                   "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM",
-                   "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM",
-                  ]
+  #datasets_name = ["/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
+  #                 "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM",
+  #                 "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM",
+  #                 "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM",
+  #                ]
+
+  #datasets_name = []
+  #nanoaod_datasets_filename = 'signal_nanoaod_datasets.txt'
+  #with open(nanoaod_datasets_filename) as nanoaod_datasets_file:
+  #  for line in nanoaod_datasets_file:
+  #    if line.strip() == "": continue
+  #    if line.strip()[0] == "#": continue
+  #    datasets_name.append(line.strip())
+
   datasets_name = []
-  nanoaod_datasets_filename = 'signal_nanoaod_datasets.txt'
+  nanoaod_datasets_filename = '2016apvdata_nanoaod_datasets.txt'
   with open(nanoaod_datasets_filename) as nanoaod_datasets_file:
     for line in nanoaod_datasets_file:
       if line.strip() == "": continue
@@ -114,7 +123,8 @@ if __name__ == "__main__":
       datasets_name.append(line.strip())
 
   #datasets_name = ["/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM"]
-  datasets_name = ["/DoubleEG/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD"]
+  #datasets_name = ["/DoubleEG/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD"]
+
   # Makes below json file including nanoaod[miniaods, event]
   version = 'UCSB2'
   command_lines_filename = f'cl_nanoaodv9'+version
@@ -122,10 +132,10 @@ if __name__ == "__main__":
   tmp_folder = 'tmp_scripts'
   run_script_folder = 'run_scripts'
   output_folder = 'nanoaod'
-  #number_of_events = '-1'
-  number_of_events = '100'
-  #do_query = True
-  do_query = False
+  number_of_events = '-1'
+  #number_of_events = '100'
+  do_query = True
+  #do_query = False
 
   if do_query:
     # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {miniaod_name}} }}
