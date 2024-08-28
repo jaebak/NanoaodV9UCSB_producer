@@ -15,36 +15,53 @@ import re
 
 
 def query_das(query, verbose=True):
-  for iRetry in range(5):
+  for iRetry in range(20):
     try:
       if verbose: print(f'Query: {query}')
-      result = subprocess.check_output(f'dasgoclient -query="{query}"', shell=True, universal_newlines=True).split()
-      break
+      result = subprocess.check_output(f'dasgoclient -query="{query}" -timeout 10', shell=True, universal_newlines=True)
+      if 'error' in result.lower():
+        print('Error: '+result)
+        print('Trying again '+str(iRetry+1)+' Query: '+nanoaod_filename)
+      else:
+        break
     except subprocess.CalledProcessError as e:
       print(e.output)
       print('Trying again '+str(iRetry+1)+' Query: '+query)
       time.sleep(3)
   if verbose: print('  Result: ' + str(result))
-  return result
+  return result.split()
 
 def query_number_events_file(nanoaod_filename):
-  try:
-    result = subprocess.check_output(f'dasgoclient -query="{nanoaod_filename}" -json', shell=True)
-  except subprocess.CalledProcessError as e:
-    print(e.output)
-    print('Trying again '+str(iRetry+1)+' Query: '+nanoaod_filename)
-    time.sleep(3)
+  for iRetry in range(20):
+    try:
+      print(f'Running: dasgoclient -query="{nanoaod_filename}" -json -timeout 10')
+      result = subprocess.check_output(f'dasgoclient -query="{nanoaod_filename}" -json -timeout 10', shell=True).decode('utf-8')
+      if 'query' in result.lower():
+        print('Error: '+result)
+        print('Trying again '+str(iRetry+1)+' Query: '+nanoaod_filename)
+      else:
+        break
+    except subprocess.CalledProcessError as e:
+      print(e.output)
+      print('Trying again '+str(iRetry+1)+' Query: '+nanoaod_filename)
+      time.sleep(3)
   result_dict_list = json.loads(result)
   number_of_events = int(result_dict_list[0]['file'][0]['nevents'])
   return number_of_events, nanoaod_filename
 
 def query_number_events_dataset(nanoaod_filename):
-  try:
-    result = subprocess.check_output(f'dasgoclient -query="{nanoaod_filename}" -json', shell=True)
-  except subprocess.CalledProcessError as e:
-    print(e.output)
-    print('Trying again '+str(iRetry+1)+' Query: '+nanoaod_filename)
-    time.sleep(3)
+  for iRetry in range(20):
+    try:
+      result = subprocess.check_output(f'dasgoclient -query="{nanoaod_filename}" -json -timeout 10', shell=True).decode('utf-8')
+      if 'query' in result.lower():
+        print('Error: '+result)
+        print('Trying again '+str(iRetry+1)+' Query: '+nanoaod_filename)
+      else:
+        break
+    except subprocess.CalledProcessError as e:
+      print(e.output)
+      print('Trying again '+str(iRetry+1)+' Query: '+nanoaod_filename)
+      time.sleep(3)
   result_dict_list = json.loads(result)
   #print(result_dict_list)
   for result_dict in result_dict_list:
@@ -53,24 +70,24 @@ def query_number_events_dataset(nanoaod_filename):
         number_of_events = int(result_dict['dataset'][0]['nevents'])
   return number_of_events, nanoaod_filename
 
-# parsed_mc_filename: WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8__RunIISummer16NanoAODv5__PUMoriond17_Nano1June2019_102X_mcRun2_asymptotic_v7-v1__120000__222071C0-CF04-1E4B-B65E-49D18B91DE8B.root
-# mc_filename: /store/mc/RunIISummer16NanoAODv5/WZTo3LNu_TuneCUETP8M1_13TeV-powheg-pythia8/NANOAODSIM/PUMoriond17_Nano1June2019_102X_mcRun2_asymptotic_v7-v1/120000/222071C0-CF04-1E4B-B65E-49D18B91DE8B.root
-def filename_to_parsed(filename):
-  input_split = filename.split('/')
-  output_path = input_split[4]+'__'+input_split[3]+'__'+input_split[6]+'_UCSB'+'__'+input_split[7]+'__'+input_split[8]
-  return output_path
-
 # nanoaod_name: /ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM
-def make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index):
+def make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version):
   _, dataset_name, era_version_name, _ = nanoaod_name.split('/')
   era_name, version_name = era_version_name.split('-',1)
+  era_name = f'{era_name}{version}'
   return f'{dataset_name}__{era_name}__{version_name}__{nanoaod_custom_name_index:03}.root'
 
 def find_era(nanoaod_filename):
+  # For mc
   if 'RunIISummer20UL18NanoAODv9' in nanoaod_filename: return '2018'
   if 'RunIISummer20UL17NanoAODv9' in nanoaod_filename: return '2017'
   if 'RunIISummer20UL16NanoAODv9' in nanoaod_filename: return '2016'
   if 'RunIISummer20UL16NanoAODAPVv9' in nanoaod_filename: return '2016APV'
+  # For data
+  if 'UL2018_MiniAODv2_NanoAODv9' in nanoaod_filename: return '2018'
+  if 'UL2017_MiniAODv2_NanoAODv9' in nanoaod_filename: return '2017'
+  if 'HIPM_UL2016_MiniAODv2_NanoAODv9' in nanoaod_filename: return '2016APV'
+  if 'UL2016_MiniAODv2_NanoAODv9' in nanoaod_filename: return '2016'
 
 def find_datatype(nanoaod_filename):
   if 'NANOAODSIM' in nanoaod_filename: return 'mc'
@@ -88,16 +105,27 @@ if __name__ == "__main__":
                    "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM",
                    "/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM",
                   ]
+  datasets_name = []
+  nanoaod_datasets_filename = 'signal_nanoaod_datasets.txt'
+  with open(nanoaod_datasets_filename) as nanoaod_datasets_file:
+    for line in nanoaod_datasets_file:
+      if line.strip() == "": continue
+      if line.strip()[0] == "#": continue
+      datasets_name.append(line.strip())
+
   #datasets_name = ["/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM"]
+  datasets_name = ["/DoubleEG/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD"]
   # Makes below json file including nanoaod[miniaods, event]
-  command_lines_filename = f'cl_nanoaodv9UCSB_v1'
-  datasets_json_filename = 'jsons/nanoaodv9UCSB_v1.json'
+  version = 'UCSB2'
+  command_lines_filename = f'cl_nanoaodv9'+version
+  datasets_json_filename = 'jsons/nanoaodv9'+version+'.json'
   tmp_folder = 'tmp_scripts'
   run_script_folder = 'run_scripts'
   output_folder = 'nanoaod'
-  number_of_events = '-1'
+  #number_of_events = '-1'
+  number_of_events = '100'
+  #do_query = True
   do_query = False
-  #number_of_events = '100'
 
   if do_query:
     # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {miniaod_name}} }}
@@ -138,7 +166,7 @@ if __name__ == "__main__":
       datasets_json[nanoaod_name]['nano_to_mini'] = {}
       accumulated_events = 0
       nanoaod_custom_name_index = 0
-      nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index)
+      nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version)
       datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name] = {'miniaods': [], 'nevents': -1}
       for miniaod_filename in datasets_json[nanoaod_name]['miniaods']:
         miniaod_events = int(datasets_json[nanoaod_name]['miniaods'][miniaod_filename])
@@ -148,7 +176,7 @@ if __name__ == "__main__":
           datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
           accumulated_events = 0
           nanoaod_custom_name_index += 1
-          nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index)
+          nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version)
           datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name] = {'miniaods': [], 'nevents': -1}
       if datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] == -1: datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
 
@@ -192,14 +220,26 @@ if __name__ == "__main__":
       # 2016APV: https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EXO-RunIISummer20UL16NanoAODAPVv9-02070
       # 2017: https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EXO-RunIISummer20UL17NanoAODv9-02656
       # 2018: https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EXO-RunIISummer20UL18NanoAODv9-02439
-      if era == '2018': # 
-        cmsCfg_command = f'cmsDriver.py --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_upgrade2018_realistic_v16_L1v1 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2018,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
-      elif era == '2016':
-        cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_mcRun2_asymptotic_v17 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2016,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
-      elif era == '2016APV':
-        cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_mcRun2_asymptotic_preVFP_v11 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2016_HIPM,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
-      elif era == '2017':
-        cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_mc2017_realistic_v9 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2017,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
+      if data_type == 'mc':
+        if era == '2018': # 
+          cmsCfg_command = f'cmsDriver.py --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_upgrade2018_realistic_v16_L1v1 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2018,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
+        elif era == '2016':
+          cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_mcRun2_asymptotic_v17 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2016,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
+        elif era == '2016APV':
+          cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_mcRun2_asymptotic_preVFP_v11 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2016_HIPM,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
+        elif era == '2017':
+          cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_mc2017_realistic_v9 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2017,run2_nanoAOD_106Xv2 --no_exec --mc -n {number_of_events}'
+      # https://gitlab.cern.ch/cms-nanoAOD/nanoaod-doc/-/wikis/Instructions/Private-production
+      # https://gitlab.cern.ch/cms-nanoAOD/nanoaod-doc/-/wikis/Releases/NanoAODv9
+      elif data_type == 'data':
+        if era == '2018': # 
+          cmsCfg_command = f'cmsDriver.py --python_filename {nanoaod_cfg_path} --eventcontent NANOAOD --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAOD --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_dataRun2_v35 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2018,run2_nanoAOD_106Xv2 --no_exec --data -n {number_of_events}'
+        elif era == '2016':
+          cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAOD --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAOD --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_dataRun2_v35 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2016,run2_nanoAOD_106Xv2 --no_exec --data -n {number_of_events}'
+        elif era == '2016APV':
+          cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAOD --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAOD --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_dataRun2_v35 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2016_HIPM,run2_nanoAOD_106Xv2 --no_exec --data -n {number_of_events}'
+        elif era == '2017':
+          cmsCfg_command = f'cmsDriver.py  --python_filename {nanoaod_cfg_path} --eventcontent NANOAOD --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAOD --fileout file:{nanoaod_folder}/{nanoaod_custom_name} --conditions 106X_dataRun2_v35 --step NANO --filein "{miniaod_filenames_string}" --era Run2_2017,run2_nanoAOD_106Xv2 --no_exec --data -n {number_of_events}'
       cmsRun_command = f'cmsRun {nanoaod_cfg_path}'
       run_script_name = f'{nanoaod_custom_name.replace(".root","")}.sh'
       run_script_path = f'{run_script_folder}/{run_script_name}'

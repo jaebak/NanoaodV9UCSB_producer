@@ -1,3 +1,8 @@
+Version
+UCSB1: Added photon variables to nanoaod
+UCSB2: Fixed scale factor file for electrons and photons for 2016APV data
+
+
 Makes nanoaodv9 from miniaod
 
 1. Code setup
@@ -21,6 +26,9 @@ git cms-addpkg PhysicsTools/NanoAOD
 # git remote add nanoaodv9UCSB git@github.com:jaebak/cmssw_nanoaodv9UCSB.git
 git remote add nanoaodv9UCSB https://github.com/jaebak/cmssw_nanoaodv9UCSB.git
 git pull nanoaodv9UCSB from-CMSSW_10_6_26
+# https://twiki.cern.ch/twiki/bin/view/CMS/EgammaUL2016To2018#Scale_and_smearing_corrections_f
+git clone -b ULSSfiles_correctScaleSysMC https://github.com/jainshilpi/EgammaAnalysis-ElectronTools.git EgammaAnalysis/ElectronTools/data/
+git cms-addpkg EgammaAnalysis/ElectronTools
 scram b
 cd ../../
 exit
@@ -32,6 +40,9 @@ source set_env.sh
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 voms-proxy-init --voms cms --out $(pwd)/voms_proxy.txt -valid 172:0
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
+mkdir run_scripts
+mkdir jsons
+mkdir tmp_scripts
 ./make_cl_files.py
 ```
 
