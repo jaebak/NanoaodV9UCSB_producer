@@ -71,11 +71,20 @@ def query_number_events_dataset(nanoaod_filename):
   return number_of_events, nanoaod_filename
 
 # nanoaod_name: /ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM
+# nanoaod_name: /SingleElectron/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
 def make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version):
-  _, dataset_name, era_version_name, _ = nanoaod_name.split('/')
-  era_name, version_name = era_version_name.split('-',1)
-  era_name = f'{era_name}{version}'
-  return f'{dataset_name}__{era_name}__{version_name}__{nanoaod_custom_name_index:03}.root'
+  data_type = find_datatype(nanoaod_name)
+  if data_type == 'mc':
+    _, dataset_name, era_version_name, _ = nanoaod_name.split('/')
+    era_name, version_name = era_version_name.split('-',1)
+    era_name = f'{era_name}{version}'
+    return f'{dataset_name}__{era_name}__{version_name}__{nanoaod_custom_name_index:03}.root'
+  elif data_type == 'data':
+    _, dataset_name, era_version_name, _ = nanoaod_name.split('/')
+    era_name, version_name = era_version_name.split('-',1)
+    version_name = version_name.replace('NanoAODv9',f'NanoAODv9{version}')
+    #print(f'{dataset_name}__{era_name}__{version_name}__{nanoaod_custom_name_index:03}.root')
+    return f'{dataset_name}__{era_name}__{version_name}__{nanoaod_custom_name_index:03}.root'
 
 def find_era(nanoaod_filename):
   # For mc
@@ -138,32 +147,32 @@ if __name__ == "__main__":
   #do_query = False
 
   if do_query:
-    # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {miniaod_name}} }}
-    datasets_json = {}
-    # Get nevents, miniaod dataset name, and miniaod filenames
-    print('Getting nevents, miniaod dataset name, and miniaod filenames')
-    for nanoaod_name in datasets_name:
-      nevents = query_number_events_dataset(nanoaod_name)[0]
-      miniaod_name = query_das(f'parent dataset={nanoaod_name}')[0]
-      datasets_json[nanoaod_name] = {'nevents': nevents, 'miniaod_name': miniaod_name, 'miniaods': {}}
-      # Get miniaod filenames
-      miniaod_filenames = query_das(f'file dataset={miniaod_name}')
-      for miniaod_filename in miniaod_filenames:
-        datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = -1
-    nested_dict.save_json_file(datasets_json, datasets_json_filename)
+    ## datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {miniaod_name}} }}
+    #datasets_json = {}
+    ## Get nevents, miniaod dataset name, and miniaod filenames
+    #print('Getting nevents, miniaod dataset name, and miniaod filenames')
+    #for nanoaod_name in datasets_name:
+    #  nevents = query_number_events_dataset(nanoaod_name)[0]
+    #  miniaod_name = query_das(f'parent dataset={nanoaod_name}')[0]
+    #  datasets_json[nanoaod_name] = {'nevents': nevents, 'miniaod_name': miniaod_name, 'miniaods': {}}
+    #  # Get miniaod filenames
+    #  miniaod_filenames = query_das(f'file dataset={miniaod_name}')
+    #  for miniaod_filename in miniaod_filenames:
+    #    datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = -1
+    #nested_dict.save_json_file(datasets_json, datasets_json_filename)
 
-    datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)
-    # Get number of events of MiniAOD with multicore
-    print('Getting number of events for MiniAOD')
-    for nanoaod_name in datasets_json:
-      ncpu = multiprocessing.cpu_count()
-      if ncpu > 8: ncpu = 8
-      pool = multiprocessing.Pool(ncpu)
-      miniaod_filenames = datasets_json[nanoaod_name]['miniaods'].keys()
-      nevents_miniaods = pool.map(query_number_events_file, miniaod_filenames)
-      for nevents, miniaod_filename in nevents_miniaods:
-        datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = nevents
-    nested_dict.save_json_file(datasets_json, datasets_json_filename)
+    #datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)
+    ## Get number of events of MiniAOD with multicore
+    #print('Getting number of events for MiniAOD')
+    #for nanoaod_name in datasets_json:
+    #  ncpu = multiprocessing.cpu_count()
+    #  if ncpu > 8: ncpu = 8
+    #  pool = multiprocessing.Pool(ncpu)
+    #  miniaod_filenames = datasets_json[nanoaod_name]['miniaods'].keys()
+    #  nevents_miniaods = pool.map(query_number_events_file, miniaod_filenames)
+    #  for nevents, miniaod_filename in nevents_miniaods:
+    #    datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = nevents
+    #nested_dict.save_json_file(datasets_json, datasets_json_filename)
 
     # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}}}
     datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)
