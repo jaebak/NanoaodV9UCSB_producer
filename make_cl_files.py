@@ -142,66 +142,66 @@ if __name__ == "__main__":
   run_script_folder = 'run_scripts'
   output_folder = 'nanoaod'
   number_of_events = '-1'
-  do_query = True
+  #do_query = True
   #number_of_events = '100'
-  #do_query = False
+  do_query = False
 
   if do_query:
-    ## datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {miniaod_name}} }}
-    #datasets_json = {}
-    ## Get nevents, miniaod dataset name, and miniaod filenames
-    #print('Getting nevents, miniaod dataset name, and miniaod filenames')
-    #for nanoaod_name in datasets_name:
-    #  nevents = query_number_events_dataset(nanoaod_name)[0]
-    #  miniaod_name = query_das(f'parent dataset={nanoaod_name}')[0]
-    #  datasets_json[nanoaod_name] = {'nevents': nevents, 'miniaod_name': miniaod_name, 'miniaods': {}}
-    #  # Get miniaod filenames
-    #  miniaod_filenames = query_das(f'file dataset={miniaod_name}')
-    #  for miniaod_filename in miniaod_filenames:
-    #    datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = -1
-    #nested_dict.save_json_file(datasets_json, datasets_json_filename)
+    # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {miniaod_name}} }}
+    datasets_json = {}
+    # Get nevents, miniaod dataset name, and miniaod filenames
+    print('Getting nevents, miniaod dataset name, and miniaod filenames')
+    for nanoaod_name in datasets_name:
+      nevents = query_number_events_dataset(nanoaod_name)[0]
+      miniaod_name = query_das(f'parent dataset={nanoaod_name}')[0]
+      datasets_json[nanoaod_name] = {'nevents': nevents, 'miniaod_name': miniaod_name, 'miniaods': {}}
+      # Get miniaod filenames
+      miniaod_filenames = query_das(f'file dataset={miniaod_name}')
+      for miniaod_filename in miniaod_filenames:
+        datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = -1
+    nested_dict.save_json_file(datasets_json, datasets_json_filename)
 
-    #datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)
-    ## Get number of events of MiniAOD with multicore
-    #print('Getting number of events for MiniAOD')
-    #for nanoaod_name in datasets_json:
-    #  ncpu = multiprocessing.cpu_count()
-    #  if ncpu > 8: ncpu = 8
-    #  pool = multiprocessing.Pool(ncpu)
-    #  miniaod_filenames = datasets_json[nanoaod_name]['miniaods'].keys()
-    #  nevents_miniaods = pool.map(query_number_events_file, miniaod_filenames)
-    #  for nevents, miniaod_filename in nevents_miniaods:
-    #    datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = nevents
-    #nested_dict.save_json_file(datasets_json, datasets_json_filename)
-
-    # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}}}
     datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)
-    #print(datasets_json)
+    # Get number of events of MiniAOD with multicore
+    print('Getting number of events for MiniAOD')
+    for nanoaod_name in datasets_json:
+      ncpu = multiprocessing.cpu_count()
+      if ncpu > 8: ncpu = 8
+      pool = multiprocessing.Pool(ncpu)
+      miniaod_filenames = datasets_json[nanoaod_name]['miniaods'].keys()
+      nevents_miniaods = pool.map(query_number_events_file, miniaod_filenames)
+      for nevents, miniaod_filename in nevents_miniaods:
+        datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = nevents
+    nested_dict.save_json_file(datasets_json, datasets_json_filename)
+
+  # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}}}
+  datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)
+  #print(datasets_json)
     
 
-    # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {'miniaods': [miniaod_name], 'nevents': }} }}
-    # Divide miniaods according to events. Divide so that each nanoaod has at least 1,000,000 events = 13evt/sec = 21 hours
-    for nanoaod_name in datasets_json:
-      datasets_json[nanoaod_name]['nano_to_mini'] = {}
-      accumulated_events = 0
-      nanoaod_custom_name_index = 0
-      nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version)
-      datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name] = {'miniaods': [], 'nevents': -1}
-      for miniaod_filename in datasets_json[nanoaod_name]['miniaods']:
-        miniaod_events = int(datasets_json[nanoaod_name]['miniaods'][miniaod_filename])
-        accumulated_events += miniaod_events
-        datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['miniaods'].append(miniaod_filename)
-        if accumulated_events > 1000000:
-          datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
-          accumulated_events = 0
-          nanoaod_custom_name_index += 1
-          nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version)
-          datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name] = {'miniaods': [], 'nevents': -1}
-      if datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] == -1: datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
+  # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {'miniaods': [miniaod_name], 'nevents': }} }}
+  # Divide miniaods according to events. Divide so that each nanoaod has at least 1,000,000 events = 13evt/sec = 21 hours
+  for nanoaod_name in datasets_json:
+    datasets_json[nanoaod_name]['nano_to_mini'] = {}
+    accumulated_events = 0
+    nanoaod_custom_name_index = 0
+    nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version)
+    datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name] = {'miniaods': [], 'nevents': -1}
+    for miniaod_filename in datasets_json[nanoaod_name]['miniaods']:
+      miniaod_events = int(datasets_json[nanoaod_name]['miniaods'][miniaod_filename])
+      accumulated_events += miniaod_events
+      datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['miniaods'].append(miniaod_filename)
+      if accumulated_events > 1000000:
+        datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
+        accumulated_events = 0
+        nanoaod_custom_name_index += 1
+        nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version)
+        datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name] = {'miniaods': [], 'nevents': -1}
+    if datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] == -1: datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
 
-    nested_dict.save_json_file(datasets_json, datasets_json_filename)
-    for nanoaod_name in datasets_json:
-      print(f"Dataset: {nanoaod_name} will have {len(datasets_json[nanoaod_name]['nano_to_mini'].keys())} custom nanoaod files")
+  nested_dict.save_json_file(datasets_json, datasets_json_filename)
+  for nanoaod_name in datasets_json:
+    print(f"Dataset: {nanoaod_name} will have {len(datasets_json[nanoaod_name]['nano_to_mini'].keys())} custom nanoaod files")
 
   # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {'miniaods': [miniaod_name], 'nevents': }} }}
   datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)

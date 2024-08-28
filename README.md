@@ -55,5 +55,6 @@ screen
 source set_env.sh
 convert_cl_to_jobs_info.py cl_nanoaodv9UCSB2 cl_nanoaodv9UCSB2.json
 mkdir logs
+# Limiting number of jobs to 128 seems to reduce issues
 auto_submit_jobs.py cl_nanoaodv9UCSB2.json -n cms18 -r 128 -c scripts/check_nanoaod_entries.py;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
 ```
