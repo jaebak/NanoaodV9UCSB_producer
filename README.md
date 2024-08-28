@@ -13,7 +13,7 @@ git clone --recurse-submodules git@github.com:jaebak/NanoaodV9UCSB_producer.git
 2. Setup cmssw for NanoAODv9UCSB
 ```
 export WORK_DIR=$(readlink -f $PWD)
-singularity shell -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /etc/vomses -B /data/localsite/SITECONF/local /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64
+singularity shell -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /etc/vomses -B /data/localsite/SITECONF/local /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7
 cd $WORK_DIR
 voms-proxy-init --voms cms --out $(pwd)/voms_proxy.txt -valid 172:0
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
