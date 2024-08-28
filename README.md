@@ -1,6 +1,6 @@
 Version
-UCSB1: Added photon variables to nanoaod
-UCSB2: Fixed scale factor file for electrons and photons for 2016APV data
+UCSB1: Added photon variables to nanoaod  
+UCSB2: Fixed scale factor file for electrons and photons for 2016APV data  
 
 
 Makes nanoaodv9 from miniaod
