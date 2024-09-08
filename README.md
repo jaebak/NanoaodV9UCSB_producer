@@ -4,6 +4,7 @@ UCSB2: Fixed scale factor file for electrons and photons for 2016APV data
 
 
 Makes nanoaodv9 from miniaod
+
 0. Download MINIAOD files due to unstable xrootd connection. Works only if server /cvmfs/cms.cern.ch/SITECONF/local is setup correctly. cms18 is setup correctly.
 ```
 source /cvmfs/cms.cern.ch/cmsset_default.sh
