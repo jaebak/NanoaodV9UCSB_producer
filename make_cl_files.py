@@ -12,6 +12,7 @@ import json
 import nested_dict
 import pathlib
 import re
+import sys
 
 
 def query_das(query, verbose=True):
@@ -139,7 +140,12 @@ if __name__ == "__main__":
   command_lines_filename = f'cl_nanoaodv9'+version
   datasets_json_filename = 'jsons/nanoaodv9'+version+'.json'
   tmp_folder = 'tmp_scripts'
+
   run_script_folder = 'run_scripts'
+  if os.path.exists(run_script_folder):
+    print(f'Error {run_script_folder} exists. Please remove {run_script_folder}.')
+    sys.exit()
+  pathlib.Path(run_script_folder).mkdir(parents=True, exist_ok=True)
   output_folder = 'nanoaod'
   number_of_events = '-1'
   #do_query = True
@@ -220,19 +226,23 @@ if __name__ == "__main__":
   command_paths = []
   # - run_script makes run_script_in_env
   # - run_script_in_env makes cfg
+  # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {'miniaods': [miniaod_name], 'nevents': }} }}
   for nanoaod_name in datasets_json:
     for nanoaod_custom_name in datasets_json[nanoaod_name]['nano_to_mini']:
       era = find_era(nanoaod_custom_name)
       data_type = find_datatype(nanoaod_name)
       nanoaod_folder = f'{output_folder}/nano/{era}/{data_type}'
-      if nanoaod_folder not in existing_folders:
-        if not os.path.exists(nanoaod_folder): print(f'Creating {nanoaod_folder} folder')
-        pathlib.Path(nanoaod_folder).mkdir(parents=True, exist_ok=True)
-        existing_folders.append(nanoaod_folder)
+      #if nanoaod_folder not in existing_folders:
+      #  if not os.path.exists(nanoaod_folder): print(f'Creating {nanoaod_folder} folder')
+      #  pathlib.Path(nanoaod_folder).mkdir(parents=True, exist_ok=True)
+      #  existing_folders.append(nanoaod_folder)
       nevents = datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents']
       miniaod_filenames = datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['miniaods']
-      miniaod_filenames_string = ','.join(miniaod_filenames)
+      #miniaod_filenames = miniaod_filenames[:1]
+      #miniaod_filenames_string = ','.join(miniaod_filenames)
       #miniaod_filenames_string = ','.join(miniaod_filenames).replace('/store','root://cms-xrd-global.cern.ch//store')
+      miniaod_filenames_string = ','.join(miniaod_filenames).replace('/store','file:cms/store')
+      to_download_miniaod_filenames_string = ' '.join(miniaod_filenames).replace('/store','cms:/store')
       nanoaod_cfg_path = f'{tmp_folder}/{nanoaod_custom_name.replace(".root","")}_cfg.py'
       # https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=%2FZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*%2F*UL*%2FNANOAODSIM
       # 2016: https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/EXO-RunIISummer20UL16NanoAODv9-02444
@@ -264,12 +274,22 @@ if __name__ == "__main__":
       run_script_path = f'{run_script_folder}/{run_script_name}'
       with open(run_script_path, 'w') as run_script:
         run_script.write(f'''#!/bin/bash
+[ -d {nanoaod_folder} ] || mkdir -p {nanoaod_folder}
+[ -d {tmp_folder} ] || mkdir -p {tmp_folder}
+# Script for downloading files
+cat <<EndOfTestFile > {tmp_folder}/{run_script_name}.download
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+source /cvmfs/cms.cern.ch/rucio/setup-py3.sh
+export RUCIO_ACCOUNT=jaebak
+rucio download --ndownloader=1 {to_download_miniaod_filenames_string}
+EndOfTestFile
 export WORK_DIR=$(readlink -f $PWD)
 cat <<EndOfTestFile > {tmp_folder}/{run_script_name}.cmd_in_env
-# Make script
+# Script for processing miniaod
 cd $WORK_DIR
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
+#tar -xvf CMSSW_10_6_26.tar.gz
 #scram p CMSSW CMSSW_10_6_26
 cd CMSSW_10_6_26/src
 cmsenv
@@ -277,16 +297,26 @@ cd ../../
 {cmsCfg_command}
 {cmsRun_command}
 EndOfTestFile
-singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /data/localsite/SITECONF/local -B /net/cms18/cms18r0/pico -B /net/cms11/cms11r0/pico -B /net/cms18/cms18r0/store /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64 bash {tmp_folder}/{run_script_name}.cmd_in_env
+#singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /data/localsite/SITECONF/local -B /net/cms18/cms18r0/pico -B /net/cms11/cms11r0/pico -B /net/cms18/cms18r0/store /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64 bash {tmp_folder}/{run_script_name}.cmd_in_env
+bash {tmp_folder}/{run_script_name}.download
+bash {tmp_folder}/{run_script_name}.cmd_in_env
+tar -zcvf {run_script_name}.tar.gz {output_folder}
 ''')
       os.chmod(run_script_path, os.stat(run_script_path).st_mode | stat.S_IEXEC)
       command_paths.append([run_script_path, nevents])
       #break
+  
+  # Compress run_scripts
+  print(f'Compress run scripts to {run_script_folder}.tar.gz')
+  os.system(f'tar -zcf {run_script_folder}.tar.gz {run_script_folder}')
 
-  # All commands for running scripts
+  # Write commands for running scripts
   with open(command_lines_filename, 'w') as command_lines_file:
     command_lines_file.write(f'echo "# [global_key] dataset_info_filename : {os.path.abspath(datasets_json_filename)}"\n')
     for command_path, nevents in command_paths:
       command_lines_file.write(f'echo {command_path} --nevents {nevents}\n')
   os.chmod(command_lines_filename, os.stat(command_lines_filename).st_mode | stat.S_IEXEC)
   print(f'{command_lines_filename} created')
+
+  print(f"Run: convert_cl_to_jobs_info.py ./{command_lines_filename} {command_lines_filename}.json ")
+  print(f"Run: auto_submit_jobs.py {command_lines_filename}.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz'")

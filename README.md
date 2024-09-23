@@ -3,27 +3,21 @@ UCSB1: Added photon variables to nanoaod
 UCSB2: Fixed scale factor file for electrons and photons for 2016APV data  
 
 
-Makes nanoaodv9 from miniaod
-
-0. Download MINIAOD files due to unstable xrootd connection. Works only if server /cvmfs/cms.cern.ch/SITECONF/local is setup correctly. cms18 is setup correctly.
-```
-source /cvmfs/cms.cern.ch/cmsset_default.sh
-source /cvmfs/cms.cern.ch/rucio/setup-py3.sh
-voms-proxy-init -voms cms -rfc -valid 192:00
-export RUCIO_ACCOUNT=jaebak
-cd /net/cms18/cms18r0/store
-rucio download --ndownloader=5 cms:/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODAPVv2-106X_mcRun2_asymptotic_preVFP_v11-v2/MINIAODSIM
-```
+Makes nanoaodv9 from miniaod on cmsconnect
 
 1. Code setup
 ```
 git clone --recurse-submodules git@github.com:jaebak/NanoaodV9UCSB_producer.git
+# If did not use recurse at clone, use following command: git submodule update --init --remote --recursive
+cd NanoaodV9UCSB_producer
+source set_env.sh
+voms-proxy-init -voms cms -rfc -valid 192:00 --out $(pwd)/voms_proxy.txt
 ```
 
 2. Setup cmssw for NanoAODv9UCSB
 ```
 export WORK_DIR=$(readlink -f $PWD)
-singularity shell -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /etc/vomses -B /data/localsite/SITECONF/local /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7
+singularity shell -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7
 cd $WORK_DIR
 voms-proxy-init --voms cms --out $(pwd)/voms_proxy.txt -valid 172:0
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
@@ -43,6 +37,7 @@ git clone -b ULSSfiles_correctScaleSysMC https://github.com/jainshilpi/EgammaAna
 git cms-addpkg EgammaAnalysis/ElectronTools
 scram b
 cd ../../
+tar -zcvf CMSSW_10_6_26.tar.gz CMSSW_10_6_26
 exit
 ```
 
@@ -50,12 +45,11 @@ exit
 ```
 source set_env.sh
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-voms-proxy-init --voms cms --out $(pwd)/voms_proxy.txt -valid 172:0
+voms-proxy-init -voms cms -rfc -valid 192:00 --out $(pwd)/voms_proxy.txt
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 mkdir run_scripts
 mkdir jsons
-mkdir tmp_scripts
-ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
+#ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
 ./make_cl_files.py
 ```
 
@@ -63,8 +57,22 @@ ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
 ```
 screen
 source set_env.sh
-convert_cl_to_jobs_info.py cl_nanoaodv9UCSB2 cl_nanoaodv9UCSB2.json
+
+voms-proxy-init -voms cms -rfc -valid 192:00 --out $(pwd)/voms_proxy.txt
+export X509_USER_PROXY=$(pwd)/voms_proxy.txt
+
+export SCRAM_ARCH=el9_amd64_gcc12
+cmsrel CMSSW_13_3_1_patch1
+cd CMSSW_13_3_1_patch1/src
+cmsenv
+cd -
+
+convert_cl_to_jobs_info.py ./cl_nanoaodv9UCSB2 cl_nanoaodv9UCSB2.json
 mkdir logs
-# Limiting number of jobs to 128 seems to reduce issues
-auto_submit_jobs.py cl_nanoaodv9UCSB2.json -n cms18 -r 128 -c scripts/check_nanoaod_entries.py;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
+auto_submit_jobs.py cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts' -cn 2;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
+```
+
+If the `auto_submit_jobs.py` was interrupted, one can resume by
+```
+auto_submit_jobs.py auto_cl_nanoaodv9UCSB2.json -o auto_cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts' -cn 2
 ```

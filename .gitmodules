@@ -1,6 +1,7 @@
 [submodule "modules/queue_system"]
 	path = modules/queue_system
 	url = git@github.com:richstu/queue_system.git
+  branch = cmsconnect
 [submodule "modules/jb_utils"]
 	path = modules/jb_utils
 	url = git@github.com:richstu/jb_utils.git

@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # The ./jobscript_check.py should return 'success' or 'fail' or 'to_submit' for a job_log_string
 # The input is given as queue_system.compress_string(job_log_string)
 # Example command
-#./check_nanoaod_entries.py 789ced95dd6bdb3010c0df0bfd1f44618fd687edd84e460649dcb2747553926cdd304628b256bbb52563c959f3df0f27694220ebc7c65ec6eec1a0d3f977ba3bdd69d64830e1067880043d97f4080637e11cd898747b60da4899cb3b70af16c0f71c1b2809b82aabc6080b5b1e2c14670518a9b264322d7229401f40c4376b9ae6cb3c1535d41980480bc34b2de472b3e4aa5a51a6520dab15b02cd598aa3174c1b4a0153359ff0ca2b3bdbeccd3addac6c447256ff772d96e6dd4481b550b5472346de4787cc18a82f8d74caac1245c7650f8ed52183d57575734b23a987e9c5b3e368a604ce78d14a39b0e25ce5c7cb14a96ded5accaa2abc8aa5626cb5980ae07d793c1249c8d2374f3b9f54f893da86a1b9380b62ec86523459b2f4ab0fd95967c6d530b56e4dae49c2e7d6b49908b31c6a8eb92c0713ddf1a75ddd0c243d7b5869e7f619d3be79e1f627b180c3ab056ca9cbd07b7aa7e68939fe6b5e046d52bd0072853a5d0e87ef19097884956ac74aed7c90c99615a9893782cbfab041ca9410fcc0cab0dd8a852ba358971f2ec4f5b65ef7f0ddf5cc3a7bc8ea2d9ec16fc601a686180510049619051d5f172aecd375f4a30b529216d8a78469e80b793e9271a8ea707cc17afc6694cbc6888fc0e2476344c6260937749dcdfc907f03a496202dd4e271a229d00701a3bf601d5b50fa8fd573a48621b12c7d951dde080ea39bfa23ecb6fa99ee7efa89e7b400d3a2f538f38486207e2f50137d42d700f2618bf09fc242d98387f836bc320e86ec1fb7edf37f07ed8ef1afeb14e7905da9bdc438897da7aac53ebae500b56402e6a097986feb9a60510a1ed80faa3d3537a2c2194fe7e2494ae43a1f4d5b13c3bd7cf65fad6a7e02297b9ce447af213599e6c96 789c7d904f4fe33010c5bf4a954b2eb8b6d3b4690f39a404b445fd83a0a05d5568e4262e351bdb913da9d46f8f5c08ab1512b7796f9ee68d7e84d80edb0e612fbc8456e0318f86341a10520b145e221c54233d2873b097d1082df3e8cd5be3294a8fa02bf81e1d8640b85259ad85a9c1574eb5186e57b63d83b0b51fb6e79050afc63a097fe5d9e7d12efea136be1ac4ffdf0bce9bdd83aafbc9c98374d254b237d029d1f85e7914d8f9f82514ffd379e4bbbd5688b20e8b4f225ad59f4012c633aaabcbb726ac3e6cead13a4975451f3ab358dc8aa6e1d95a185b6ccad398967fee24faad5d2e6145c60c7e6d49c6d072c660db19797d3f063edaca67a245fdea447b5c2d57a43de35189295d17eb4db1291f172b7aff14fa812745eb12c6a7102af85d6764c2f80c384b7e83ae2e192745a33caa0a4e1939719a32c6189da57c3a4a2719b99ea52561f33425f349764b6e463793ac64c97c5a8c87ce5aeca9a83a8fb2c928e9f507c33cdaede260c75703f6f285f08b781e711ebd0372efc242
+# ./scripts/check_nanoaod_entries.py 789cad51cb4ec33010bcf72bf6075c27210f253708482da20551ca25aa568ebd550dad1dad9348fc3d0a54e2d2deb8edec687646b3cdd2edfd0eb43f9d943368ec680d3154b0e915f7f08b0d9ef926dacd9a6b8a7a602637699874eff9ab02e943e7fd51ea53104320961f8a5af529d7ca79e5cd7bb9ad3777d8b1378326be7efabca980078741b3edfa201fa95fbc21be0e2e89e2bc465c2c5f56b87d9a10aeacb3b7cff7638293d734fd7825624c10a3289a870308e16824d70788a3b848b37826038fb24d4997b9694512e77b9196a5126d91b5c2a8f82629b24c5359ccc3a182a37504d9ff86aa60ed210cfa007b7b24f0fc57e7f57a1e9cb9f4a96f1567a073 789c558f3d4fc3301086ff4ae5a593e324cd8732648032144401016541e864c717d5a5b12b9f9305f1df9153b512dbddfbe8de47c7b99641120630b677d09b235a3960cb84a3937347d10dc447422f0e1295fc164fd23ae9f447b35bbfddc2c93b3d769192b324ec194e33cc9318b205e79d1b066975cbfc68813a6f4e81c40386cd3bc0eb68f334abd6009bfb972dec1ee3065b63cdcdf3dd9443f4c5e95cc9a71c204dd384f60bce2d4e68032db234ab8b328baa8353404186915a46a31a4c08a82f2078238fd4b2cf655554ab2249215d7efd87e05192b32dfbf9bd00a3d106d31bf42dbbde4538f7131967e1fae1ec9fbd978c842ab06b2aad789e553d2f9a467255978a6b99adf2ba2c3b6cea84f6ec0f27da83af
 import sys
 import queue_system
 import argparse
@@ -32,50 +32,6 @@ def get_file_path(base_path, mid_path, input_path):
   input_split = input_path.split('/')
   return base_path+'/'+mid_path+'/'+input_split[4]+'__'+input_split[3]+'__'+input_split[6]+'__'+input_split[7]+'__'+input_split[8]
 
-def check_entries(job_argument_string):
-  #try:
-    print(job_argument_string)
-    args = get_args(['dataset_files_info_filename', 'command'], job_argument_string)
-    args_command = get_args_command(args['command'])
-
-    print(args)
-    print(args_command)
-    file_path = get_file_path(args_command['output_path'], "", args_command['input_path'])
-    if not os.path.isfile(file_path): 
-      # Wait for file to appear on raid
-      file_exists = False
-      for iWait in range(10):
-        print('iWait: '+str(iWait)+'/10 Waiting 10 seconds for file to appear')
-        time.sleep(10)
-        if os.path.isfile(file_path):
-          file_exists = True
-          break
-      if not file_exists:
-        return '[For queue_system] fail: no file named '+file_path
-
-    root_file = ROOT.TFile.Open(file_path)
-    if not root_file: return '[For queue_system] fail: Failed in opening '+file_path
-    root_tree = root_file.Get('Events')
-    root_number_entries = root_tree.GetEntries()
-
-    #print(args['dataset_files_info_filename'][1:-1])
-    #datasets_files_info[dataset][filename] = {'number_events':number_events}
-    dataset_files_info = nested_dict.load_json_file_py3(args['dataset_files_info_filename'], False)
-    path_to_keys_dataset_files_info = datasets.get_path_to_keys_dataset_files_info(dataset_files_info)
-    keys = path_to_keys_dataset_files_info[args_command['input_path']]
-    #print(keys)
-    #print(nested_dict.get_item_nested_dict(dataset_files_info,keys))
-    dataset_number_entries = nested_dict.get_item_nested_dict(dataset_files_info,keys)['number_events']
-
-    #print(root_number_entries)
-    #print(dataset_number_entries)
-    if root_number_entries == dataset_number_entries:
-      return '[For queue_system] success'
-    else:
-      return '[For queue_system] fail: root_number_entries: '+str(root_number_entries)+' and dataset_number_entries: '+str(dataset_number_entries)+' do not match'
-  #except:
-  #  return '[For queue_system] fail: exception occurred in check_entries'
-  
 
 if __name__ == "__main__":
   ignore_error = False
@@ -90,6 +46,12 @@ if __name__ == "__main__":
   command_args = get_args(['nevents'], args['command'])
   command = args['command'].split()[0]
   #print(args)
+
+  # Untar file
+  if os.path.isfile(f'{os.path.basename(command)}.tar.gz'):
+    print(f'Untaring {os.path.basename(command)}.tar.gz')
+    os.system(f'tar -zxvf {os.path.basename(command)}.tar.gz')
+    os.system(f'rm -f {os.path.basename(command)}.tar.gz')
 
   # Find fileout in command file
   nanoaod_file_path = ''
