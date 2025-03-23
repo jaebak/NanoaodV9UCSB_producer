@@ -70,7 +70,7 @@ cd -
 
 convert_cl_to_jobs_info.py ./cl_nanoaodv9UCSB2 cl_nanoaodv9UCSB2.json
 mkdir logs
-auto_submit_jobs.py cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
+auto_submit_jobs.py cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2"
 ```
 
 If the `auto_submit_jobs.py` was interrupted, one can resume by

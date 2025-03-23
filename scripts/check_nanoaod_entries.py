@@ -47,6 +47,7 @@ if __name__ == "__main__":
   command = args['command'].split()[0]
   #print(args)
 
+
   # Untar file
   if os.path.isfile(f'{os.path.basename(command)}.tar.gz'):
     print(f'Untaring {os.path.basename(command)}.tar.gz')
@@ -59,6 +60,11 @@ if __name__ == "__main__":
     for line in command_file:
       if 'fileout' not in line: continue
       nanoaod_file_path = re.findall('--fileout file:(.*?root)', line)[0]
+  
+  if not os.path.isfile(nanoaod_file_path):
+    print('[For queue_system] fail: No file '+nanoaod_file_path)
+    sys.exit()
+
   # Find nevent in root NanoAOD
   root_file = ROOT.TFile.Open(nanoaod_file_path)
   if not root_file: 

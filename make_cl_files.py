@@ -338,7 +338,7 @@ cd ../../
 EndOfTestFile
 #singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /data/localsite/SITECONF/local -B /net/cms18/cms18r0/pico -B /net/cms11/cms11r0/pico -B /net/cms18/cms18r0/store /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64 bash {tmp_folder}/{run_script_name}.cmd_in_env
 bash {tmp_folder}/{run_script_name}.download
-[ $? -ne 0 ] || exit 1
+#[ $? -ne 0 ] || exit 1
 bash {tmp_folder}/{run_script_name}.cmd_in_env
 bash {tmp_folder}/{run_script_name}.cmd_in_env2
 tar -zcvf {run_script_name}.tar.gz {output_folder}
