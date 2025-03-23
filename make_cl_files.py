@@ -311,6 +311,7 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 #scram p CMSSW CMSSW_10_6_26
 cd CMSSW_10_6_26/src
 cmsenv
+scramv1 b ProjectRename
 scram b
 cd ../../
 {cmsCfg_command}
