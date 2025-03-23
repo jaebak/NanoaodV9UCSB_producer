@@ -13,6 +13,7 @@ import nested_dict
 import pathlib
 import re
 import sys
+import argparse
 
 
 def query_das(query, verbose=True):
@@ -108,6 +109,17 @@ def get_miniaod_files(argument):
   return query_das(f'parent file={nanoaod_filename}', verbose=False), nanoaod_filename
 
 if __name__ == "__main__":
+  
+  parser = argparse.ArgumentParser(description='''\
+Makes run scripts based on dataset strings in txt file.
+Output folder is nanoaod.
+''', formatter_class=argparse.RawTextHelpFormatter)
+
+  parser.add_argument('-i','--input', required=True, help='Input txt file that has dataset names')
+  parser.add_argument('-t', '--do_test', action="store_true", help='Test the script')
+  
+  args = parser.parse_args()
+
   # Make cl file and json file for checking
 
   #datasets_name = ["/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM",
@@ -125,7 +137,8 @@ if __name__ == "__main__":
   #    datasets_name.append(line.strip())
 
   datasets_name = []
-  nanoaod_datasets_filename = '2016apvdata_nanoaod_datasets.txt'
+  #nanoaod_datasets_filename = 'txt/2016apvdata_nanoaod_datasets.txt'
+  nanoaod_datasets_filename = args.input
   with open(nanoaod_datasets_filename) as nanoaod_datasets_file:
     for line in nanoaod_datasets_file:
       if line.strip() == "": continue
@@ -148,9 +161,12 @@ if __name__ == "__main__":
   pathlib.Path(run_script_folder).mkdir(parents=True, exist_ok=True)
   output_folder = 'nanoaod'
   number_of_events = '-1'
-  #do_query = True
+  do_query = True
   #number_of_events = '100'
-  do_query = False
+  #do_query = False
+  if args.do_test:
+    number_of_events = '100'
+    do_query = True
 
   if do_query:
     # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {miniaod_name}} }}
@@ -165,6 +181,8 @@ if __name__ == "__main__":
       miniaod_filenames = query_das(f'file dataset={miniaod_name}')
       for miniaod_filename in miniaod_filenames:
         datasets_json[nanoaod_name]['miniaods'][miniaod_filename] = -1
+        if args.do_test: break
+      if args.do_test: break
     nested_dict.save_json_file(datasets_json, datasets_json_filename)
 
     datasets_json = nested_dict.load_json_file_py3(datasets_json_filename)
@@ -293,6 +311,7 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 #scram p CMSSW CMSSW_10_6_26
 cd CMSSW_10_6_26/src
 cmsenv
+scram b
 cd ../../
 {cmsCfg_command}
 {cmsRun_command}
@@ -319,4 +338,4 @@ tar -zcvf {run_script_name}.tar.gz {output_folder}
   print(f'{command_lines_filename} created')
 
   print(f"Run: convert_cl_to_jobs_info.py ./{command_lines_filename} {command_lines_filename}.json ")
-  print(f"Run: auto_submit_jobs.py {command_lines_filename}.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz'")
+  print(f"Run: auto_submit_jobs.py {command_lines_filename}.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2")

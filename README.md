@@ -28,8 +28,6 @@ cd CMSSW_10_6_26/src
 cmsenv
 git cms-addpkg PhysicsTools/NanoAOD
 # To update cmsssw code
-# git remote add nanoaodv9UCSBgit git@github.com:jaebak/cmssw_nanoaodv9UCSB.git
-# git push --set-upstream nanoaodv9UCSBgit from-CMSSW_10_6_26
 git remote add nanoaodv9UCSB https://github.com/jaebak/cmssw_nanoaodv9UCSB.git
 git pull nanoaodv9UCSB from-CMSSW_10_6_26
 # https://twiki.cern.ch/twiki/bin/view/CMS/EgammaUL2016To2018#Scale_and_smearing_corrections_f
@@ -47,10 +45,10 @@ source set_env.sh
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 voms-proxy-init -voms cms -rfc -valid 192:00 --out $(pwd)/voms_proxy.txt
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
-mkdir run_scripts
 mkdir jsons
 #ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
-./make_cl_files.py
+mkdir nanoaod
+./make_cl_files.py -i txt/2016apvdata_nanoaod_datasets.txt
 ```
 
 4. Running cl file
@@ -69,10 +67,10 @@ cd -
 
 convert_cl_to_jobs_info.py ./cl_nanoaodv9UCSB2 cl_nanoaodv9UCSB2.json
 mkdir logs
-auto_submit_jobs.py cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts' -cn 2;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
+auto_submit_jobs.py cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2;sendTelegramMessage.py "Finished 2018 nanoaodv9UCSB2"
 ```
 
 If the `auto_submit_jobs.py` was interrupted, one can resume by
 ```
-auto_submit_jobs.py auto_cl_nanoaodv9UCSB2.json -o auto_cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts' -cn 2
+auto_submit_jobs.py auto_cl_nanoaodv9UCSB2.json -o auto_cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2
 ```
