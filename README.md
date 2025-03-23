@@ -40,7 +40,7 @@ exit
 ```
 
 3. Making cl file
-```
+``
 source set_env.sh
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 voms-proxy-init -voms cms -rfc -valid 192:00 --out $(pwd)/voms_proxy.txt
@@ -48,6 +48,7 @@ export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 mkdir jsons
 #ln -s /net/cms18/cms18r0/pico/NanoAODv9UCSB2 nanoaod
 mkdir nanoaod
+#./make_cl_files.py -i txt/2016apvdata_nanoaod_datasets.txt
 ./make_cl_files.py -i txt/2016apvdata_nanoaod_datasets.txt
 ```
 

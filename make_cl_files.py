@@ -314,12 +314,25 @@ cmsenv
 scramv1 b ProjectRename
 scram b
 cd ../../
+EndOfTestFile
+cat <<EndOfTestFile > {tmp_folder}/{run_script_name}.cmd_in_env2
+# Script for processing miniaod
+cd $WORK_DIR
+export SCRAM_ARCH=slc7_amd64_gcc700
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+#tar -xvf CMSSW_10_6_26.tar.gz
+#scram p CMSSW CMSSW_10_6_26
+cd CMSSW_10_6_26/src
+cmsenv
+scram b
+cd ../../
 {cmsCfg_command}
 {cmsRun_command}
 EndOfTestFile
 #singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /data/localsite/SITECONF/local -B /net/cms18/cms18r0/pico -B /net/cms11/cms11r0/pico -B /net/cms18/cms18r0/store /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64 bash {tmp_folder}/{run_script_name}.cmd_in_env
 bash {tmp_folder}/{run_script_name}.download
 bash {tmp_folder}/{run_script_name}.cmd_in_env
+bash {tmp_folder}/{run_script_name}.cmd_in_env2
 tar -zcvf {run_script_name}.tar.gz {output_folder}
 ''')
       os.chmod(run_script_path, os.stat(run_script_path).st_mode | stat.S_IEXEC)
