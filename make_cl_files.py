@@ -117,6 +117,7 @@ Output folder is nanoaod.
 
   parser.add_argument('-i','--input', required=True, help='Input txt file that has dataset names')
   parser.add_argument('-t', '--do_test', action="store_true", help='Test the script')
+  parser.add_argument('-s', '--skip_query', action="store_true", help='Skip query')
   
   args = parser.parse_args()
 
@@ -162,6 +163,8 @@ Output folder is nanoaod.
   output_folder = 'nanoaod'
   number_of_events = '-1'
   do_query = True
+  if args.skip_query:
+    do_query = False
   #number_of_events = '100'
   #do_query = False
   if args.do_test:
@@ -204,7 +207,7 @@ Output folder is nanoaod.
     
 
   # datasets_json = {nanoaod_name: {'nevents':, 'miniaod_name':, 'miniaods': {'filename': nevent}, 'nano_to_mini': {nanoaod_custom_name: {'miniaods': [miniaod_name], 'nevents': }} }}
-  # Divide miniaods according to events. Divide so that each nanoaod has at least 1,000,000 events = 13evt/sec = 21 hours
+  # Divide miniaods according to events. Divide so that each nanoaod has at least 300,000 events = 13evt/sec = 7 hours
   for nanoaod_name in datasets_json:
     datasets_json[nanoaod_name]['nano_to_mini'] = {}
     accumulated_events = 0
@@ -215,13 +218,17 @@ Output folder is nanoaod.
       miniaod_events = int(datasets_json[nanoaod_name]['miniaods'][miniaod_filename])
       accumulated_events += miniaod_events
       datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['miniaods'].append(miniaod_filename)
-      if accumulated_events > 1000000:
+      if accumulated_events > 300000:
         datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
         accumulated_events = 0
         nanoaod_custom_name_index += 1
         nanoaod_custom_name = make_nanoaod_custom_name(nanoaod_name, nanoaod_custom_name_index, version)
         datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name] = {'miniaods': [], 'nevents': -1}
-    if datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] == -1: datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
+    if datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] == -1: 
+      if accumulated_events == 0:
+        del datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]
+      else:
+        datasets_json[nanoaod_name]['nano_to_mini'][nanoaod_custom_name]['nevents'] = accumulated_events
 
   nested_dict.save_json_file(datasets_json, datasets_json_filename)
   for nanoaod_name in datasets_json:
@@ -331,6 +338,7 @@ cd ../../
 EndOfTestFile
 #singularity exec -B /cvmfs -B /etc/grid-security -B $HOME/.globus -B $WORK_DIR -B /etc/cvmfs -B /data/localsite/SITECONF/local -B /net/cms18/cms18r0/pico -B /net/cms11/cms11r0/pico -B /net/cms18/cms18r0/store /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64 bash {tmp_folder}/{run_script_name}.cmd_in_env
 bash {tmp_folder}/{run_script_name}.download
+[ $? -ne 0 ] || exit 1
 bash {tmp_folder}/{run_script_name}.cmd_in_env
 bash {tmp_folder}/{run_script_name}.cmd_in_env2
 tar -zcvf {run_script_name}.tar.gz {output_folder}

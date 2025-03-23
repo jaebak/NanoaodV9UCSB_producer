@@ -41,6 +41,7 @@ exit
 
 3. Making cl file
 ``
+screen
 source set_env.sh
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 voms-proxy-init -voms cms -rfc -valid 192:00 --out $(pwd)/voms_proxy.txt
@@ -50,6 +51,7 @@ mkdir jsons
 mkdir nanoaod
 #./make_cl_files.py -i txt/2016apvdata_nanoaod_datasets.txt
 ./make_cl_files.py -i txt/2016apvdata_nanoaod_datasets.txt
+exit
 ```
 
 4. Running cl file
