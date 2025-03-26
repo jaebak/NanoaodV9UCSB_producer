@@ -70,10 +70,17 @@ cd -
 
 convert_cl_to_jobs_info.py ./cl_nanoaodv9UCSB2 cl_nanoaodv9UCSB2.json
 mkdir logs
-auto_submit_jobs.py cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2"
+auto_submit_jobs.py cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2
 ```
 
 If the `auto_submit_jobs.py` was interrupted, one can resume by
 ```
+auto_submit_jobs.py auto_cl_nanoaodv9UCSB2.json -o auto_cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2
+```
+
+To rerun failed jobs,
+```
+cp auto_cl_nanoaodv9UCSB2.json auto_cl_nanoaodv9UCSB2.json.2
+select_resubmit_jobs.py auto_cl_nanoaodv9UCSB2.json -s fail -c scripts/check_nanoaod_entries.py -o auto_cl_nanoaodv9UCSB2.json
 auto_submit_jobs.py auto_cl_nanoaodv9UCSB2.json -o auto_cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2
 ```
