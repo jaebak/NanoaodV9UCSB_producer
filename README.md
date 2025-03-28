@@ -84,3 +84,18 @@ cp auto_cl_nanoaodv9UCSB2.json auto_cl_nanoaodv9UCSB2.json.2
 select_resubmit_jobs.py auto_cl_nanoaodv9UCSB2.json -s fail -c scripts/check_nanoaod_entries.py -o auto_cl_nanoaodv9UCSB2.json
 auto_submit_jobs.py auto_cl_nanoaodv9UCSB2.json -o auto_cl_nanoaodv9UCSB2.json -c scripts/check_nanoaod_entries.py -ci 'voms_proxy.txt,CMSSW_10_6_26.tar.gz,run_scripts.tar.gz' -cn 2
 ```
+
+5. Resolving issues with MiniAOD files
+
+5.1 Find MiniAOD files for failed jobs, which uses `crab checkfile --lfn /store/..`
+
+```
+export SCRAM_ARCH=el9_amd64_gcc12
+cmsrel CMSSW_13_3_1_patch1
+cd CMSSW_13_3_1_patch1/src
+cmsenv
+cd -
+source set_env.sh
+find_failed_miniaod_jobs.py -i auto_cl_nanoaodv9UCSB2.json
+find_failed_miniaod_jobs.py -i auto_cl_nanoaodv9UCSB2.json -p
+```
